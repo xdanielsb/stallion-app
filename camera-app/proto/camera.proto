@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package camera;
+
+service CameraService {
+  rpc SendImage(ImageRequest) returns (ImageResponse);
+}
+
+message ImageRequest {
+  bytes image_data = 1;
+  string format = 2;
+  int32 width = 3;
+  int32 height = 4;
+  int64 timestamp = 5;
+}
+
+message ImageResponse {
+  bool success = 1;
+  string message = 2;
+  string image_id = 3;
+}

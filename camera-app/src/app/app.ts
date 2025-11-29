@@ -94,9 +94,40 @@ export class App implements OnInit, OnDestroy {
     const imageData = canvas.toDataURL('image/jpeg', 0.9);
     console.log('Image captured:', imageData.substring(0, 50) + '...');
     
-    // Here you would send the image to the backend via gRPC
-    // For now, we'll just log it
-    alert('Image captured! Check console for data URL. This will be sent to backend via gRPC in the next step.');
+    // Send the image to the backend via gRPC
+    this.isCapturing.set(true);
+    this.cameraService.sendImageToBackend(
+      imageData, 
+      canvas.width, 
+      canvas.height
+    ).subscribe({
+      next: (response) => {
+        console.log('Image processed by backend:', response);
+        this.isCapturing.set(false);
+        if (response.success) {
+          let message = 'Image processed successfully!\n\n';
+          if (response.image_info) {
+            message += `Dimensions: ${response.image_info.width}x${response.image_info.height}\n`;
+            message += `Format: ${response.image_info.format}\n`;
+            message += `Size: ${Math.round(response.image_info.size_bytes / 1024)}KB\n`;
+            message += `Aspect Ratio: ${response.image_info.aspect_ratio.toFixed(2)}\n`;
+          }
+          if (response.color_info) {
+            message += `Dominant Color: ${response.color_info.dominant_color}\n`;
+            message += `Is Grayscale: ${response.color_info.is_grayscale ? 'Yes' : 'No'}\n`;
+            message += `Has Transparency: ${response.color_info.has_transparency ? 'Yes' : 'No'}`;
+          }
+          alert(message);
+        } else {
+          alert(`Failed to process image: ${response.message}`);
+        }
+      },
+      error: (error) => {
+        console.error('Error processing image on backend:', error);
+        this.isCapturing.set(false);
+        alert('Error processing image on backend. Check console for details.');
+      }
+    });
   }
   
   getErrorMessage(error: any): string {

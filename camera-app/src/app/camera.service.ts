@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
+import { GrpcClientService } from './grpc-client.service';
 
 @Injectable({
   providedIn: 'root'
@@ -7,7 +8,7 @@ import { Observable, throwError } from 'rxjs';
 export class CameraService {
   private stream: MediaStream | null = null;
 
-  constructor() { }
+  constructor(private grpcClient: GrpcClientService) { }
 
   getCameraStream(): Observable<MediaStream> {
     return new Observable(observer => {
@@ -57,5 +58,9 @@ export class CameraService {
 
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     return canvas.toDataURL('image/jpeg', 0.9);
+  }
+
+  sendImageToBackend(imageData: string, width: number, height: number) {
+    return this.grpcClient.sendImageToBackend(imageData, width, height);
   }
 }

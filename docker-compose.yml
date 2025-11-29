@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # Backend gRPC Server
+  backend:
+    build: ./backend
+    ports:
+      - "50051:50051"
+    container_name: image-processor-backend
+    restart: unless-stopped
+
+  # HTTP to gRPC Gateway
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
+    ports:
+      - "3000:3000"
+    container_name: grpc-gateway
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      - NODE_ENV=production
+
+  # Frontend Angular App with HTTPS
+  frontend:
+    build: ./camera-app
+    ports:
+      - "4200:80"
+      - "443:443"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    container_name: camera-app-frontend
+    depends_on:
+      - gateway
+
+  # Frontend Development Service
+  frontend-dev:
+    build:
+      context: ./camera-app
+      dockerfile: Dockerfile.dev
+    ports:
+      - "4201:4200"
+    volumes:
+      - ./camera-app:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+    container_name: camera-app-frontend-dev
+    depends_on:
+      - gateway
+    profiles:
+      - dev
