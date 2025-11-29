@@ -89,7 +89,7 @@ body {
   gap: 1rem;
 }
 
-.capture-button, .stop-button, .start-button, .retry-button {
+.capture-button, .stop-button, .start-button, .retry-button, .auto-capture-button {
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 8px;
@@ -129,6 +129,36 @@ body {
 
 .stop-button:hover, .retry-button:hover {
   background: #1a202c;
+}
+
+.auto-capture-button {
+  background: #4a5568;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  
+  &.active {
+    background: #10b981;
+    animation: pulse-green 2s infinite;
+  }
+  
+  &:hover:not(.active) {
+    background: #2d3748;
+  }
+}
+
+.auto-icon {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid white;
+  border-radius: 50%;
+  display: inline-block;
+  transition: all 0.3s ease;
+  
+  &.spinning {
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+  }
 }
 
 .start-button {
@@ -298,6 +328,69 @@ body {
   border-radius: 4px;
   border: 1px solid #e2e8f0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Auto-capture indicator */
+.auto-capture-indicator {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(16, 185, 129, 0.9);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: slideIn 0.3s ease-out;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.5);
+  }
+}
+
+@keyframes pulse-green {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 @media (max-width: 768px) {

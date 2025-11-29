@@ -25,6 +25,11 @@ export class App implements OnInit, OnDestroy {
   imageInfo = signal<ImageInfo | null>(null);
   colorInfo = signal<ColorInfo | null>(null);
   
+  // Auto-capture properties
+  isAutoCapturing = signal(true);
+  captureInterval: any = null;
+  lastCaptureTime = 0;
+  
   constructor(private cameraService: CameraService) {}
   
   ngOnInit(): void {
@@ -58,6 +63,11 @@ export class App implements OnInit, OnDestroy {
             this.videoElement.nativeElement.play().catch(e => {
               console.error('Video play error:', e);
             });
+            
+            // Start auto-capture after video is playing
+            setTimeout(() => {
+              this.startAutoCapture();
+            }, 1000);
           } else {
             console.error('Video element not available');
           }
@@ -72,6 +82,7 @@ export class App implements OnInit, OnDestroy {
   }
   
   stopCamera(): void {
+    this.stopAutoCapture();
     this.cameraService.stopCamera();
     this.stream = null;
     this.isCameraActive.set(false);
@@ -81,10 +92,42 @@ export class App implements OnInit, OnDestroy {
     }
   }
   
-  captureImage(): void {
+  startAutoCapture(): void {
+    if (!this.isAutoCapturing()) {
+      return;
+    }
+    
+    console.log('Starting auto-capture...');
+    this.isAutoCapturing.set(true);
+    
+    // Capture first image immediately
+    this.autoCapture();
+    
+    // Then capture every 2 seconds
+    this.captureInterval = setInterval(() => {
+      this.autoCapture();
+    }, 2000);
+  }
+  
+  stopAutoCapture(): void {
+    if (this.captureInterval) {
+      clearInterval(this.captureInterval);
+      this.captureInterval = null;
+    }
+    this.isAutoCapturing.set(false);
+  }
+  
+  autoCapture(): void {
     if (!this.stream || !this.videoElement || !this.canvasElement) {
       return;
     }
+    
+    const now = Date.now();
+    // Prevent too frequent captures (minimum 500ms between captures)
+    if (now - this.lastCaptureTime < 500) {
+      return;
+    }
+    this.lastCaptureTime = now;
     
     const video = this.videoElement.nativeElement;
     const canvas = this.canvasElement.nativeElement;
@@ -98,23 +141,16 @@ export class App implements OnInit, OnDestroy {
     canvas.height = video.videoHeight;
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     
-    const imageData = canvas.toDataURL('image/jpeg', 0.9);
-    console.log('Image captured:', imageData.substring(0, 50) + '...');
+    const imageData = canvas.toDataURL('image/jpeg', 0.8); // Slightly lower quality for faster transmission
     
     // Send image to backend via gRPC
-    this.isCapturing.set(true);
-    this.clearResults();
-    
     this.cameraService.sendImageToBackend(
       imageData, 
       canvas.width, 
       canvas.height
     ).subscribe({
       next: (response) => {
-        console.log('Image processed by backend:', response);
-        this.isCapturing.set(false);
-        
-        // Update result signals
+        // Update result signals without showing loading state
         this.processingStatus.set({
           success: response.success,
           message: response.message
@@ -125,10 +161,9 @@ export class App implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error processing image on backend:', error);
-        this.isCapturing.set(false);
         this.processingStatus.set({
           success: false,
-          message: 'Error processing image on backend'
+          message: 'Backend processing error'
         });
       }
     });
@@ -143,6 +178,15 @@ export class App implements OnInit, OnDestroy {
   // Helper method for template
   formatFileSize(bytes: number): string {
     return Math.round(bytes / 1024).toString();
+  }
+  
+  // Toggle auto-capture
+  toggleAutoCapture(): void {
+    if (this.isAutoCapturing()) {
+      this.stopAutoCapture();
+    } else {
+      this.startAutoCapture();
+    }
   }
   
   getErrorMessage(error: any): string {

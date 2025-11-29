@@ -40,9 +40,15 @@
       <!-- Controls only show when camera is active -->
       @if (isCameraActive()) {
         <div class="camera-controls">
-          <button class="capture-button" (click)="captureImage()">
+          <button class="capture-button" (click)="autoCapture()">
             <span class="capture-icon"></span>
-            Capture
+            Capture Now
+          </button>
+          <button class="auto-capture-button" 
+                  [class.active]="isAutoCapturing()" 
+                  (click)="toggleAutoCapture()">
+            <span class="auto-icon" [class.spinning]="isAutoCapturing()"></span>
+            Auto Capture: {{ isAutoCapturing() ? 'ON' : 'OFF' }}
           </button>
           <button class="stop-button" (click)="stopCamera()">
             Stop Camera
@@ -59,8 +65,15 @@
       <div class="processing-results" 
            [class.success]="processingStatus()?.success" 
            [class.error]="!processingStatus()?.success">
-        <h3>Image Processing</h3>
+        <h3>🖼️ Image Processing</h3>
         <p class="status-message">{{ processingStatus()?.message }}</p>
+      </div>
+    }
+    
+    @if (isAutoCapturing()) {
+      <div class="auto-capture-indicator">
+        <div class="pulse-dot"></div>
+        <span>Live Auto-Capture Active</span>
       </div>
     }
     
