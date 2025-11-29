@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package image_service;
+
+// The image processing service definition
+service ImageProcessor {
+  // Process a single image and return analysis
+  rpc ProcessImage (ImageRequest) returns (ImageResponse);
+}
+
+// Request message containing image data
+message ImageRequest {
+  bytes image_data = 1;        // Raw image bytes
+  string image_format = 2;      // Image format (jpeg, png, etc.)
+}
+
+// Basic image information
+message ImageInfo {
+  uint32 width = 1;            // Image width in pixels
+  uint32 height = 2;           // Image height in pixels
+  string format = 3;           // Image format
+  uint64 size_bytes = 4;       // File size in bytes
+  float aspect_ratio = 5;       // Width / height ratio
+}
+
+// Simple color information
+message ColorInfo {
+  string dominant_color = 1;    // Dominant color in HEX format
+  bool is_grayscale = 2;       // Whether image is grayscale
+  bool has_transparency = 3;    // Whether image has alpha channel
+}
+
+// Response message containing image information
+message ImageResponse {
+  bool success = 1;            // Whether processing succeeded
+  string message = 2;          // Status message or error
+  ImageInfo image_info = 3;    // Basic image information
+  ColorInfo color_info = 4;     // Color information
+}
