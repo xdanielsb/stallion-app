@@ -1,0 +1,57 @@
+<div class="camera-app">
+  <header class="app-header">
+    <h1>{{ title() }}</h1>
+    <p>Camera feed for image capture and inference</p>
+  </header>
+  
+  <main class="camera-container">
+    <div class="video-wrapper">
+      <!-- Video element always rendered but visibility controlled -->
+      <video 
+        #videoElement 
+        autoplay 
+        playsinline 
+        muted
+        [class.visible]="isCameraActive()"
+        class="camera-feed">
+      </video>
+      
+      <!-- Overlay elements that show/hide based on state -->
+      @if (isCapturing()) {
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+          <p>Initializing camera...</p>
+        </div>
+      } @else if (errorMessage()) {
+        <div class="error-message">
+          <div class="error-icon">⚠️</div>
+          <h2>Camera Error</h2>
+          <p>{{ errorMessage() }}</p>
+          <button class="retry-button" (click)="initializeCamera()">Retry</button>
+        </div>
+      } @else if (!isCameraActive()) {
+        <div class="camera-off">
+          <div class="camera-icon">📷</div>
+          <p>Camera is off</p>
+          <button class="start-button" (click)="initializeCamera()">Start Camera</button>
+        </div>
+      }
+      
+      <!-- Controls only show when camera is active -->
+      @if (isCameraActive()) {
+        <div class="camera-controls">
+          <button class="capture-button" (click)="captureImage()">
+            <span class="capture-icon"></span>
+            Capture
+          </button>
+          <button class="stop-button" (click)="stopCamera()">
+            Stop Camera
+          </button>
+        </div>
+      }
+      
+      <!-- Hidden canvas for image capture -->
+      <canvas #canvasElement style="display: none;"></canvas>
+    </div>
+  </main>
+</div>
