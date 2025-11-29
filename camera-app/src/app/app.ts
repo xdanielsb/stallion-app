@@ -30,6 +30,12 @@ export class App implements OnInit, OnDestroy {
   captureInterval: any = null;
   lastCaptureTime = 0;
   
+  // Statistics tracking
+  processedCount = signal(0);
+  totalResponseTime = signal(0);
+  lastResponseTime = signal(0);
+  averageResponseTime = signal(0);
+  
   constructor(private cameraService: CameraService) {}
   
   ngOnInit(): void {
@@ -47,6 +53,7 @@ export class App implements OnInit, OnDestroy {
     this.isCapturing.set(true);
     this.errorMessage.set('');
     this.clearResults();
+    this.resetStatistics(); // Reset stats when starting camera
     
     this.cameraService.getCameraStream().subscribe({
       next: (stream) => {
@@ -117,6 +124,13 @@ export class App implements OnInit, OnDestroy {
     this.isAutoCapturing.set(false);
   }
   
+  resetStatistics(): void {
+    this.processedCount.set(0);
+    this.totalResponseTime.set(0);
+    this.lastResponseTime.set(0);
+    this.averageResponseTime.set(0);
+  }
+  
   autoCapture(): void {
     if (!this.stream || !this.videoElement || !this.canvasElement) {
       return;
@@ -128,6 +142,8 @@ export class App implements OnInit, OnDestroy {
       return;
     }
     this.lastCaptureTime = now;
+    
+    const startTime = Date.now();
     
     const video = this.videoElement.nativeElement;
     const canvas = this.canvasElement.nativeElement;
@@ -150,6 +166,15 @@ export class App implements OnInit, OnDestroy {
       canvas.height
     ).subscribe({
       next: (response) => {
+        // Calculate response time
+        const responseTime = Date.now() - startTime;
+        
+        // Update statistics
+        this.processedCount.set(this.processedCount() + 1);
+        this.lastResponseTime.set(responseTime);
+        this.totalResponseTime.set(this.totalResponseTime() + responseTime);
+        this.averageResponseTime.set(Math.round(this.totalResponseTime() / this.processedCount()));
+        
         // Update result signals without showing loading state
         this.processingStatus.set({
           success: response.success,
@@ -160,6 +185,13 @@ export class App implements OnInit, OnDestroy {
         this.colorInfo.set(response.color_info || null);
       },
       error: (error) => {
+        // Still update statistics for error
+        const responseTime = Date.now() - startTime;
+        this.processedCount.set(this.processedCount() + 1);
+        this.lastResponseTime.set(responseTime);
+        this.totalResponseTime.set(this.totalResponseTime() + responseTime);
+        this.averageResponseTime.set(Math.round(this.totalResponseTime() / this.processedCount()));
+        
         console.error('Error processing image on backend:', error);
         this.processingStatus.set({
           success: false,

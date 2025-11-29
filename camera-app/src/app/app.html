@@ -48,7 +48,10 @@
                   [class.active]="isAutoCapturing()" 
                   (click)="toggleAutoCapture()">
             <span class="auto-icon" [class.spinning]="isAutoCapturing()"></span>
-            Auto Capture: {{ isAutoCapturing() ? 'ON' : 'OFF' }}
+            Auto: {{ isAutoCapturing() ? 'ON' : 'OFF' }}
+            @if (processedCount() > 0) {
+              <span class="capture-count">({{ processedCount() }})</span>
+            }
           </button>
           <button class="stop-button" (click)="stopCamera()">
             Stop Camera
@@ -74,6 +77,36 @@
       <div class="auto-capture-indicator">
         <div class="pulse-dot"></div>
         <span>Live Auto-Capture Active</span>
+      </div>
+    }
+    
+    <!-- Statistics Display -->
+    @if (processedCount() > 0) {
+      <div class="stats-panel">
+        <h3>📈 Processing Statistics</h3>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-label">Images Processed</span>
+            <span class="stat-value primary">{{ processedCount() }}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Last Response</span>
+            <span class="stat-value" [class.fast]="lastResponseTime() < 500" [class.medium]="lastResponseTime() >= 500 && lastResponseTime() < 1000" [class.slow]="lastResponseTime() >= 1000">
+              {{ lastResponseTime() }}ms
+            </span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Average Response</span>
+            <span class="stat-value" [class.fast]="averageResponseTime() < 500" [class.medium]="averageResponseTime() >= 500 && averageResponseTime() < 1000" [class.slow]="averageResponseTime() >= 1000">
+              {{ averageResponseTime() }}ms
+            </span>
+          </div>
+        </div>
+        <div class="stats-actions">
+          <button class="reset-stats-button" (click)="resetStatistics()">
+            Reset Stats
+          </button>
+        </div>
       </div>
     }
     
