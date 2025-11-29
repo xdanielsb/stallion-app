@@ -1,6 +1,7 @@
 import { Component, signal, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CameraService } from './camera.service';
+import { ImageInfo, ColorInfo } from './grpc-client.service';
 
 @Component({
   selector: 'app-root',
@@ -19,6 +20,11 @@ export class App implements OnInit, OnDestroy {
   isCapturing = signal(false);
   errorMessage = signal('');
   
+  // Response display signals
+  processingStatus = signal<{ success: boolean; message: string } | null>(null);
+  imageInfo = signal<ImageInfo | null>(null);
+  colorInfo = signal<ColorInfo | null>(null);
+  
   constructor(private cameraService: CameraService) {}
   
   ngOnInit(): void {
@@ -35,6 +41,7 @@ export class App implements OnInit, OnDestroy {
   initializeCamera(): void {
     this.isCapturing.set(true);
     this.errorMessage.set('');
+    this.clearResults();
     
     this.cameraService.getCameraStream().subscribe({
       next: (stream) => {
@@ -94,8 +101,10 @@ export class App implements OnInit, OnDestroy {
     const imageData = canvas.toDataURL('image/jpeg', 0.9);
     console.log('Image captured:', imageData.substring(0, 50) + '...');
     
-    // Send the image to the backend via gRPC
+    // Send image to backend via gRPC
     this.isCapturing.set(true);
+    this.clearResults();
+    
     this.cameraService.sendImageToBackend(
       imageData, 
       canvas.width, 
@@ -104,30 +113,36 @@ export class App implements OnInit, OnDestroy {
       next: (response) => {
         console.log('Image processed by backend:', response);
         this.isCapturing.set(false);
-        if (response.success) {
-          let message = 'Image processed successfully!\n\n';
-          if (response.image_info) {
-            message += `Dimensions: ${response.image_info.width}x${response.image_info.height}\n`;
-            message += `Format: ${response.image_info.format}\n`;
-            message += `Size: ${Math.round(response.image_info.size_bytes / 1024)}KB\n`;
-            message += `Aspect Ratio: ${response.image_info.aspect_ratio.toFixed(2)}\n`;
-          }
-          if (response.color_info) {
-            message += `Dominant Color: ${response.color_info.dominant_color}\n`;
-            message += `Is Grayscale: ${response.color_info.is_grayscale ? 'Yes' : 'No'}\n`;
-            message += `Has Transparency: ${response.color_info.has_transparency ? 'Yes' : 'No'}`;
-          }
-          alert(message);
-        } else {
-          alert(`Failed to process image: ${response.message}`);
-        }
+        
+        // Update result signals
+        this.processingStatus.set({
+          success: response.success,
+          message: response.message
+        });
+        
+        this.imageInfo.set(response.image_info || null);
+        this.colorInfo.set(response.color_info || null);
       },
       error: (error) => {
         console.error('Error processing image on backend:', error);
         this.isCapturing.set(false);
-        alert('Error processing image on backend. Check console for details.');
+        this.processingStatus.set({
+          success: false,
+          message: 'Error processing image on backend'
+        });
       }
     });
+  }
+  
+  clearResults(): void {
+    this.processingStatus.set(null);
+    this.imageInfo.set(null);
+    this.colorInfo.set(null);
+  }
+
+  // Helper method for template
+  formatFileSize(bytes: number): string {
+    return Math.round(bytes / 1024).toString();
   }
   
   getErrorMessage(error: any): string {

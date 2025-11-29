@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
-interface ImageRequest {
+// Export types for use in components
+export interface ImageRequest {
   image_data: string;
   image_format: string;
 }
 
-interface ImageInfo {
+export interface ImageInfo {
   width: number;
   height: number;
   format: string;
@@ -15,13 +16,13 @@ interface ImageInfo {
   aspect_ratio: number;
 }
 
-interface ColorInfo {
+export interface ColorInfo {
   dominant_color: string;
   is_grayscale: boolean;
   has_transparency: boolean;
 }
 
-interface ImageResponse {
+export interface ImageResponse {
   success: boolean;
   message: string;
   image_info?: ImageInfo;

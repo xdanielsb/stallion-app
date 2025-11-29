@@ -183,6 +183,123 @@ body {
   opacity: 0.9;
 }
 
+/* Results Display */
+.processing-results {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  
+  &.success {
+    border-left: 4px solid #10b981;
+    background: rgba(16, 185, 129, 0.1);
+  }
+  
+  &.error {
+    border-left: 4px solid #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+  }
+  
+  h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    color: #2d3748;
+  }
+  
+  .status-message {
+    margin: 0;
+    color: #4a5568;
+    font-size: 1rem;
+  }
+}
+
+.image-info {
+  margin-top: 2rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  
+  h3 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.5rem;
+    color: #2d3748;
+    text-align: center;
+  }
+}
+
+.info-section {
+  margin-bottom: 2rem;
+  
+  h4 {
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+    color: #4a5568;
+    font-weight: 600;
+  }
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  
+  .label {
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 0.9rem;
+  }
+  
+  .value {
+    font-weight: 500;
+    color: #2d3748;
+    
+    &.grayscale {
+      background: #6b7280;
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+.color-display {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.color-box {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
 @media (max-width: 768px) {
   .app-header {
     padding: 1rem;

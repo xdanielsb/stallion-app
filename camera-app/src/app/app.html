@@ -53,5 +53,73 @@
       <!-- Hidden canvas for image capture -->
       <canvas #canvasElement style="display: none;"></canvas>
     </div>
+    
+    <!-- Image Processing Results -->
+    @if (processingStatus()) {
+      <div class="processing-results" 
+           [class.success]="processingStatus()?.success" 
+           [class.error]="!processingStatus()?.success">
+        <h3>Image Processing</h3>
+        <p class="status-message">{{ processingStatus()?.message }}</p>
+      </div>
+    }
+    
+    @if (imageInfo() || colorInfo()) {
+      <div class="image-info">
+        <h3>📊 Image Analysis Results</h3>
+        
+        @if (imageInfo()) {
+          <div class="info-section">
+            <h4>🖼️ Image Information</h4>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="label">Dimensions:</span>
+                <span class="value">{{ imageInfo()!.width }} × {{ imageInfo()!.height }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Format:</span>
+                <span class="value">{{ imageInfo()!.format }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Size:</span>
+                <span class="value">{{ formatFileSize(imageInfo()!.size_bytes) }} KB</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Aspect Ratio:</span>
+                <span class="value">{{ imageInfo()!.aspect_ratio.toFixed(2) }}</span>
+              </div>
+            </div>
+          </div>
+        }
+        
+        @if (colorInfo()) {
+          <div class="info-section">
+            <h4>🎨 Color Information</h4>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="label">Dominant Color:</span>
+                <div class="color-display">
+                  <div class="color-box" 
+                       [style.background-color]="colorInfo()!.dominant_color"></div>
+                  <span class="value">{{ colorInfo()!.dominant_color }}</span>
+                </div>
+              </div>
+              <div class="info-item">
+                <span class="label">Grayscale:</span>
+                <span class="value" [class.grayscale]="colorInfo()!.is_grayscale">
+                  {{ colorInfo()!.is_grayscale ? 'Yes' : 'No' }}
+                </span>
+              </div>
+              <div class="info-item">
+                <span class="label">Transparency:</span>
+                <span class="value">
+                  {{ colorInfo()!.has_transparency ? 'Yes' : 'No' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
   </main>
 </div>
