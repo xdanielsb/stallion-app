@@ -4,7 +4,7 @@ const protoLoader = require('@grpc/proto-loader');
 const cors = require('cors');
 
 // Load protobuf
-const PROTO_PATH = './proto/image_service.proto';
+const PROTO_PATH = './backend/proto/image_service.proto';
 const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
   keepCase: true,
   longs: String,
@@ -17,7 +17,7 @@ const imageService = grpc.loadPackageDefinition(packageDefinition).image_service
 
 // Create gRPC client
 const client = new imageService.ImageProcessor(
-  'backend:50051', // Use Docker service name instead of localhost
+  'localhost:50051', // Use Docker service name instead of localhost
   grpc.credentials.createInsecure()
 );
 
@@ -77,7 +77,15 @@ app.post('/api/process-image', async (req, res) => {
           dominant_color: response.color_info.dominant_color,
           is_grayscale: response.color_info.is_grayscale,
           has_transparency: response.color_info.has_transparency
-        } : null
+        } : null,
+        bounding_boxes: response.bounding_boxes ? response.bounding_boxes.map(box => ({
+          x1: box.x1,
+          y1: box.y1,
+          x2: box.x2,
+          y2: box.y2,
+          label: box.label,
+          confidence: box.confidence
+        })) : []
       };
 
       res.json(result);

@@ -22,11 +22,21 @@ export interface ColorInfo {
   has_transparency: boolean;
 }
 
+export interface BoundingBoxInfo {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  label: string;
+  confidence: number;
+}
+
 export interface ImageResponse {
   success: boolean;
   message: string;
   image_info?: ImageInfo;
   color_info?: ColorInfo;
+  bounding_boxes?: BoundingBoxInfo[];
 }
 
 @Injectable({

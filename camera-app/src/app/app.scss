@@ -77,6 +77,46 @@ body {
   opacity: 1;
 }
 
+/* Bounding Box Overlay */
+.bounding-box-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.bounding-box {
+  position: absolute;
+  border: 2px solid #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  pointer-events: auto;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: rgba(16, 185, 129, 0.2);
+    border-color: #059669;
+    border-width: 3px;
+  }
+}
+
+.bounding-box-label {
+  position: absolute;
+  top: -24px;
+  left: 0;
+  background: rgba(16, 185, 129, 0.9);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 .camera-controls {
   position: absolute;
   bottom: 0;
@@ -485,6 +525,68 @@ body {
     background: #dc2626;
     transform: scale(1.05);
   }
+}
+
+/* Objects List */
+.objects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.object-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: #edf2f7;
+    transform: translateX(4px);
+  }
+}
+
+.object-index {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #3182ce;
+  color: white;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.object-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.object-label {
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 0.95rem;
+}
+
+.object-confidence {
+  font-weight: 500;
+  color: #10b981;
+  font-size: 0.85rem;
+}
+
+.object-coords {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-family: monospace;
 }
 
 @keyframes spin {

@@ -10,7 +10,7 @@ RUN npm install
 
 # Copy gateway code and proto files
 COPY grpc-gateway.js .
-COPY backend/proto ./proto
+COPY backend/proto ./backend/proto
 
 # Expose port
 EXPOSE 3000

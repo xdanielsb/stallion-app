@@ -1,7 +1,7 @@
 import { Component, signal, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CameraService } from './camera.service';
-import { ImageInfo, ColorInfo } from './grpc-client.service';
+import { ImageInfo, ColorInfo, BoundingBoxInfo } from './grpc-client.service';
 
 @Component({
   selector: 'app-root',
@@ -24,6 +24,7 @@ export class App implements OnInit, OnDestroy {
   processingStatus = signal<{ success: boolean; message: string } | null>(null);
   imageInfo = signal<ImageInfo | null>(null);
   colorInfo = signal<ColorInfo | null>(null);
+  boundingBoxes = signal<BoundingBoxInfo[]>([]);
   
   // Auto-capture properties
   isAutoCapturing = signal(true);
@@ -183,6 +184,7 @@ export class App implements OnInit, OnDestroy {
         
         this.imageInfo.set(response.image_info || null);
         this.colorInfo.set(response.color_info || null);
+        this.boundingBoxes.set(response.bounding_boxes || []);
       },
       error: (error) => {
         // Still update statistics for error
@@ -205,6 +207,7 @@ export class App implements OnInit, OnDestroy {
     this.processingStatus.set(null);
     this.imageInfo.set(null);
     this.colorInfo.set(null);
+    this.boundingBoxes.set([]);
   }
 
   // Helper method for template

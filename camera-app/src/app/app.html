@@ -16,6 +16,23 @@
         class="camera-feed">
       </video>
       
+      <!-- Bounding Box Overlay -->
+      @if (isCameraActive() && boundingBoxes().length > 0) {
+        <div class="bounding-box-overlay">
+          @for (box of boundingBoxes(); track box) {
+            <div 
+              class="bounding-box"
+              [style.left]="(box.x1 / videoElement.videoWidth * 100) + '%'"
+              [style.top]="(box.y1 / videoElement.videoHeight * 100) + '%'"
+              [style.width]="((box.x2 - box.x1) / videoElement.videoWidth * 100) + '%'"
+              [style.height]="((box.y2 - box.y1) / videoElement.videoHeight * 100) + '%'"
+              [title]="'${box.label} (' + (box.confidence * 100).toFixed(1) + '%)'">
+              <span class="bounding-box-label">{{ box.label }} {{ (box.confidence * 100).toFixed(1) }}%</span>
+            </div>
+          }
+        </div>
+      }
+      
       <!-- Overlay elements that show/hide based on state -->
       @if (isCapturing()) {
         <div class="loading-spinner">
@@ -162,6 +179,24 @@
                   {{ colorInfo()!.has_transparency ? 'Yes' : 'No' }}
                 </span>
               </div>
+            </div>
+          </div>
+        }
+        
+        @if (boundingBoxes().length > 0) {
+          <div class="info-section">
+            <h4>🎯 Detected Objects ({{ boundingBoxes().length }})</h4>
+            <div class="objects-list">
+              @for (box of boundingBoxes(); track box; let i = $index) {
+                <div class="object-item">
+                  <span class="object-index">{{ i + 1 }}</span>
+                  <div class="object-details">
+                    <span class="object-label">{{ box.label }}</span>
+                    <span class="object-confidence">{{ (box.confidence * 100).toFixed(1) }}%</span>
+                    <span class="object-coords">x:{{ box.x1.toFixed(0) }},y:{{ box.y1.toFixed(0) }} w:{{ (box.x2 - box.x1).toFixed(0) }}h:{{ (box.y2 - box.y1).toFixed(0) }}</span>
+                  </div>
+                </div>
+              }
             </div>
           </div>
         }
