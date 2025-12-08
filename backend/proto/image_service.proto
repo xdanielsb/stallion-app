@@ -30,10 +30,21 @@ message ColorInfo {
   bool has_transparency = 3;    // Whether image has alpha channel
 }
 
+// Bounding box information
+message BoundingBoxInfo {
+  float x1 = 1;                  // Top-left x coordinate
+  float y1 = 2;                  // Top-left y coordinate
+  float x2 = 3;                  // Bottom-right x coordinate
+  float y2 = 4;                  // Bottom-right y coordinate
+  string label = 5;              // Object class label
+  float confidence = 6;          // Confidence score
+}
+
 // Response message containing image information
 message ImageResponse {
   bool success = 1;            // Whether processing succeeded
   string message = 2;          // Status message or error
   ImageInfo image_info = 3;    // Basic image information
   ColorInfo color_info = 4;     // Color information
+  repeated BoundingBoxInfo bounding_boxes = 5;  // Detected objects
 }

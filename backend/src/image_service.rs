@@ -41,6 +41,28 @@ pub struct ColorInfo {
     #[prost(bool, tag = "3")]
     pub has_transparency: bool,
 }
+/// Bounding box information
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct BoundingBoxInfo {
+    /// Top-left x coordinate
+    #[prost(float, tag = "1")]
+    pub x1: f32,
+    /// Top-left y coordinate
+    #[prost(float, tag = "2")]
+    pub y1: f32,
+    /// Bottom-right x coordinate
+    #[prost(float, tag = "3")]
+    pub x2: f32,
+    /// Bottom-right y coordinate
+    #[prost(float, tag = "4")]
+    pub y2: f32,
+    /// Object class label
+    #[prost(string, tag = "5")]
+    pub label: ::prost::alloc::string::String,
+    /// Confidence score
+    #[prost(float, tag = "6")]
+    pub confidence: f32,
+}
 /// Response message containing image information
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ImageResponse {
@@ -56,6 +78,9 @@ pub struct ImageResponse {
     /// Color information
     #[prost(message, optional, tag = "4")]
     pub color_info: ::core::option::Option<ColorInfo>,
+    /// Detected objects
+    #[prost(message, repeated, tag = "5")]
+    pub bounding_boxes: ::prost::alloc::vec::Vec<BoundingBoxInfo>,
 }
 /// Generated client implementations.
 pub mod image_processor_client {
