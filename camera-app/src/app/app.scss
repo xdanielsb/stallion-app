@@ -49,7 +49,8 @@ body {
 .camera-container {
   flex: 1;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: flex-start;
   align-items: center;
   padding: 2rem;
 }
@@ -591,6 +592,35 @@ body {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* Fallback image styles */
+.fallback-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+
+  &.visible {
+    display: block;
+  }
+}
+
+.fallback-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(245, 158, 11, 0.9);
+  color: white;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  z-index: 15;
+  backdrop-filter: blur(4px);
 }
 
 @media (max-width: 768px) {

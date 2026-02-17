@@ -12,7 +12,7 @@
         autoplay 
         playsinline 
         muted
-        [class.visible]="isCameraActive()"
+        [class.visible]="isCameraActive() && !useFallbackImage()"
         class="camera-feed">
       </video>
       
@@ -20,12 +20,12 @@
       @if (isCameraActive() && boundingBoxes().length > 0) {
         <div class="bounding-box-overlay">
           @for (box of boundingBoxes(); track box) {
-            <div 
+            <div
               class="bounding-box"
-              [style.left]="(box.x1 / videoElement.videoWidth * 100) + '%'"
-              [style.top]="(box.y1 / videoElement.videoHeight * 100) + '%'"
-              [style.width]="((box.x2 - box.x1) / videoElement.videoWidth * 100) + '%'"
-              [style.height]="((box.y2 - box.y1) / videoElement.videoHeight * 100) + '%'"
+              [style.left]="useFallbackImage() ? (box.x1 / canvasElement.width * 100) + '%' : (box.x1 / videoElement.videoWidth * 100) + '%'"
+              [style.top]="useFallbackImage() ? (box.y1 / canvasElement.height * 100) + '%' : (box.y1 / videoElement.videoHeight * 100) + '%'"
+              [style.width]="useFallbackImage() ? ((box.x2 - box.x1) / canvasElement.width * 100) + '%' : ((box.x2 - box.x1) / videoElement.videoWidth * 100) + '%'"
+              [style.height]="useFallbackImage() ? ((box.y2 - box.y1) / canvasElement.height * 100) + '%' : ((box.y2 - box.y1) / videoElement.videoHeight * 100) + '%'"
               [title]="'${box.label} (' + (box.confidence * 100).toFixed(1) + '%)'">
               <span class="bounding-box-label">{{ box.label }} {{ (box.confidence * 100).toFixed(1) }}%</span>
             </div>
@@ -39,7 +39,7 @@
           <div class="spinner"></div>
           <p>Initializing camera...</p>
         </div>
-      } @else if (errorMessage()) {
+      } @else if (errorMessage() && !useFallbackImage()) {
         <div class="error-message">
           <div class="error-icon">⚠️</div>
           <h2>Camera Error</h2>
@@ -76,8 +76,15 @@
         </div>
       }
       
-      <!-- Hidden canvas for image capture -->
-      <canvas #canvasElement style="display: none;"></canvas>
+      <!-- Fallback image banner -->
+      @if (useFallbackImage()) {
+        <div class="fallback-banner">
+          <span>Camera not found — using generated test image</span>
+        </div>
+      }
+
+      <!-- Canvas for image capture (visible in fallback mode, hidden otherwise) -->
+      <canvas #canvasElement [class.visible]="useFallbackImage()" [class.hidden]="!useFallbackImage()" class="fallback-canvas"></canvas>
     </div>
     
     <!-- Image Processing Results -->

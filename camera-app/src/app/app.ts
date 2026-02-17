@@ -19,6 +19,7 @@ export class App implements OnInit, OnDestroy {
   isCameraActive = signal(false);
   isCapturing = signal(false);
   errorMessage = signal('');
+  useFallbackImage = signal(false);
   
   // Response display signals
   processingStatus = signal<{ success: boolean; message: string } | null>(null);
@@ -83,8 +84,14 @@ export class App implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Camera access error:', error);
-        this.errorMessage.set(this.getErrorMessage(error));
         this.isCapturing.set(false);
+
+        if (error.name === 'NotFoundError') {
+          this.errorMessage.set('Camera not found. Using fallback test image.');
+          this.setupFallbackImage();
+        } else {
+          this.errorMessage.set(this.getErrorMessage(error));
+        }
       }
     });
   }
@@ -94,12 +101,46 @@ export class App implements OnInit, OnDestroy {
     this.cameraService.stopCamera();
     this.stream = null;
     this.isCameraActive.set(false);
-    
+    this.useFallbackImage.set(false);
+    this.errorMessage.set('');
+
     if (this.videoElement) {
       this.videoElement.nativeElement.srcObject = null;
     }
   }
   
+  setupFallbackImage(): void {
+    this.useFallbackImage.set(true);
+    this.isCameraActive.set(true);
+
+    setTimeout(() => {
+      if (!this.canvasElement) return;
+
+      const canvas = this.canvasElement.nativeElement;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const img = new Image();
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        console.log('Fallback image loaded onto canvas:', img.width, 'x', img.height);
+
+        setTimeout(() => {
+          this.startAutoCapture();
+        }, 500);
+      };
+      img.onerror = () => {
+        console.error('Failed to load fallback image');
+        this.errorMessage.set('Camera not found and fallback image failed to load.');
+        this.useFallbackImage.set(false);
+        this.isCameraActive.set(false);
+      };
+      img.src = 'fallback-test.jpg';
+    }, 100);
+  }
+
   startAutoCapture(): void {
     if (!this.isAutoCapturing()) {
       return;
@@ -133,30 +174,37 @@ export class App implements OnInit, OnDestroy {
   }
   
   autoCapture(): void {
-    if (!this.stream || !this.videoElement || !this.canvasElement) {
+    if (!this.canvasElement) {
       return;
     }
-    
+
+    if (!this.useFallbackImage() && (!this.stream || !this.videoElement)) {
+      return;
+    }
+
     const now = Date.now();
     // Prevent too frequent captures (minimum 500ms between captures)
     if (now - this.lastCaptureTime < 500) {
       return;
     }
     this.lastCaptureTime = now;
-    
+
     const startTime = Date.now();
-    
-    const video = this.videoElement.nativeElement;
+
     const canvas = this.canvasElement.nativeElement;
     const context = canvas.getContext('2d');
-    
+
     if (!context) {
       return;
     }
-    
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    if (!this.useFallbackImage()) {
+      const video = this.videoElement.nativeElement;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    }
+    // For fallback mode, the canvas already has the drawn scene
     
     const imageData = canvas.toDataURL('image/jpeg', 0.8); // Slightly lower quality for faster transmission
     
