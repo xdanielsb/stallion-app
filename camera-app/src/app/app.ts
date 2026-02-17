@@ -27,6 +27,10 @@ export class App implements OnInit, OnDestroy {
   colorInfo = signal<ColorInfo | null>(null);
   boundingBoxes = signal<BoundingBoxInfo[]>([]);
   
+  // Fallback image panning
+  fallbackImg: HTMLImageElement | null = null;
+  fallbackOffsetX = 0;
+
   // Auto-capture properties
   isAutoCapturing = signal(true);
   captureInterval: any = null;
@@ -102,6 +106,8 @@ export class App implements OnInit, OnDestroy {
     this.stream = null;
     this.isCameraActive.set(false);
     this.useFallbackImage.set(false);
+    this.fallbackImg = null;
+    this.fallbackOffsetX = 0;
     this.errorMessage.set('');
 
     if (this.videoElement) {
@@ -125,6 +131,8 @@ export class App implements OnInit, OnDestroy {
         canvas.width = img.width;
         canvas.height = img.height;
         ctx.drawImage(img, 0, 0);
+        this.fallbackImg = img;
+        this.fallbackOffsetX = 0;
         console.log('Fallback image loaded onto canvas:', img.width, 'x', img.height);
 
         setTimeout(() => {
@@ -198,13 +206,28 @@ export class App implements OnInit, OnDestroy {
       return;
     }
 
-    if (!this.useFallbackImage()) {
+    if (this.useFallbackImage() && this.fallbackImg) {
+      // Pan the image left each capture to show bounding boxes updating
+      const img = this.fallbackImg;
+      const shiftStep = 20;
+      this.fallbackOffsetX = (this.fallbackOffsetX + shiftStep) % img.width;
+
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      // Draw the shifted portion (wraps around)
+      const sx = this.fallbackOffsetX;
+      const remainingWidth = img.width - sx;
+      // Left part: from offset to end of image
+      context.drawImage(img, sx, 0, remainingWidth, img.height, 0, 0, remainingWidth, canvas.height);
+      // Right part: wrap from beginning of image
+      if (sx > 0) {
+        context.drawImage(img, 0, 0, sx, img.height, remainingWidth, 0, sx, canvas.height);
+      }
+    } else if (!this.useFallbackImage()) {
       const video = this.videoElement.nativeElement;
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
     }
-    // For fallback mode, the canvas already has the drawn scene
     
     const imageData = canvas.toDataURL('image/jpeg', 0.8); // Slightly lower quality for faster transmission
     
